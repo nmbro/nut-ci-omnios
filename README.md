@@ -47,10 +47,10 @@ To build locally (needs KVM, `qemu-img`, `cloud-localds`):
 
 ## Reproducibility
 
-Bit-for-bit identical images are not the goal: ZFS stores transaction
-numbers, GUIDs and timestamps, and block placement depends on timing. The
-claim is that the same pins give the same packages and files. Two builds
-can be compared with their lists:
+Two builds give different qcow2 files, because ZFS stores transaction
+numbers, GUIDs and timestamps, and places blocks according to timing. The
+same pins do give the same packages and files, and two builds can be
+compared with their lists:
 `diff a/clang-22.files.txt b/clang-22.files.txt` should print nothing.
 `image/vm-layer.sh` names the paths it leaves out (they change on every
 boot by design) and the few files it hashes without their date comment
@@ -70,6 +70,19 @@ gh attestation verify oci://ghcr.io/<owner>/nut-ci-omnios@sha256:<digest> \
   --source-ref refs/heads/main \
   --deny-self-hosted-runners
 ```
+
+Both attestations are about the manifest digest. The manifest lists each
+layer and each package and file list by its own digest, so one verified
+manifest digest covers all of them. The SBOM attestation carries the
+package list a second time, as SPDX.
+
+### Planned: a second signature from a rebuild
+
+A rebuild outside GitHub, on a maintainer's own machine, would build the
+same pins, compare its file lists with the published ones, and if they
+match, sign the manifest with a cosign key that GitHub never sees. A
+consumer could then require both signatures: built by this workflow, and
+reproduced independently. This is not implemented yet.
 
 ### Note for a repository with more than one maintainer
 
@@ -96,8 +109,8 @@ networkupstools takes the build over.
 The scripts and workflows in this repository are under the 0BSD license
 (LICENSE): use them for anything, no attribution needed.
 
-That covers this repository only, not the images it builds. An image is an
-OmniOS system: illumos itself is mostly CDDL-1.0, and the packages on top
+The images it builds are licensed differently. An image is an OmniOS
+system: illumos itself is mostly CDDL-1.0, and the packages on top
 keep their own licenses (GPL and LGPL for gcc, git and bash, Apache-2.0
 with the LLVM exception for clang, Apache-2.0 for OpenSSL, BSD-style for
 net-snmp, and so on). `pkg info --license <package>` inside an image shows
@@ -106,5 +119,5 @@ each one. OmniOS publishes how every package is built
 [omnios-extra](https://github.com/omniosorg/omnios-extra)), and each
 image's package list names the exact builds it contains.
 
-The tools that build the images are used, not shipped: QEMU (GPL-2.0),
+The images don't include the tools that build them: QEMU (GPL-2.0),
 cloud-utils (GPL-3.0), ORAS (Apache-2.0) and the GitHub actions (MIT).

@@ -57,6 +57,15 @@ jobs:
         env:
           RELEASE: ${{ inputs.release }}
           REPO: ghcr.io/${{ github.repository_owner }}/nut-ci-omnios
+          # GHCR shows the package's description from the last pushed
+          # manifest, so it is the same for every variant; the variant is in
+          # the title and version annotations
+          DESCRIPTION: >-
+            OmniOS VM images for Network UPS Tools CI on GitHub-hosted runners.
+            Each tag is a qcow2 chain: the official OmniOS cloud image, NUT's
+            build prerequisites, and one compiler. Boot the layer named in
+            io.github.nut-ci.omnios.top, from a throwaway overlay. Built with
+            SLSA provenance and an SPDX SBOM.
           GH_TOKEN: ${{ github.token }}
           ACTOR: ${{ github.actor }}
         run: |
@@ -78,7 +87,10 @@ jobs:
               --annotation "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
               --annotation "org.opencontainers.image.revision=$GITHUB_SHA" \
               --annotation "org.opencontainers.image.created=$created" \
-              --annotation "org.opencontainers.image.description=OmniOS $RELEASE + NUT build prerequisites + $name, qcow2 chain: boot $name.c.qcow2" \
+              --annotation "org.opencontainers.image.title=nut-ci-omnios $RELEASE $name" \
+              --annotation "org.opencontainers.image.description=$DESCRIPTION" \
+              --annotation "org.opencontainers.image.url=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY#readme" \
+              --annotation "org.opencontainers.image.version=$RELEASE-$name" \
               --annotation "io.github.nut-ci.omnios.base-url=$BASE_URL" \
               --annotation "io.github.nut-ci.omnios.base-sha256=$BASE_SHA256" \
               --annotation "io.github.nut-ci.omnios.top=$name.c.qcow2" \

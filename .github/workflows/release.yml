@@ -1,0 +1,30 @@
+# Build, push and attest the image chain when its definition changes on
+# main, or on request. Never from pull requests: only this repository's own
+# runs on its protected main branch may push the image.
+name: "Build and publish"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "image/**"
+      - ".github/workflows/build.yml"
+      - ".github/workflows/release.yml"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  r151058:
+    uses: ./.github/workflows/build.yml
+    with:
+      release: r151058
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write

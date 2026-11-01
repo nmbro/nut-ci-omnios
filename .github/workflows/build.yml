@@ -81,7 +81,7 @@ jobs:
           for entry in $COMPILERS; do
             name=${entry%%=*}
             SBOM_CREATED=$created python3 "$GITHUB_WORKSPACE/image/mkspdx.py" \
-              "$RELEASE-$name" "$name.pkgs.txt" "$BASE_URL" "$BASE_SHA256" > "$name.spdx.json"
+              "$RELEASE-$name" "$name.pkgs.txt" "$name.licenses.txt" "$BASE_URL" "$BASE_SHA256" > "$name.spdx.json"
             digest=$(oras push "$REPO:$RELEASE-$name" \
               --artifact-type application/vnd.nut-ci.omnios.image.v1 \
               --annotation "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
@@ -96,7 +96,8 @@ jobs:
               --annotation "io.github.nut-ci.omnios.top=$name.c.qcow2" \
               --annotation "io.github.nut-ci.omnios.run=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
               "base.c.qcow2:$L" "nut-deps.c.qcow2:$L" "$name.c.qcow2:$L" \
-              "nut-deps.pkgs.txt:$T" "nut-deps.files.txt:$T" "$name.pkgs.txt:$T" "$name.files.txt:$T" \
+              "nut-deps.pkgs.txt:$T" "nut-deps.licenses.txt:$T" "nut-deps.files.txt:$T" \
+              "$name.pkgs.txt:$T" "$name.licenses.txt:$T" "$name.files.txt:$T" \
               --format go-template='{{.digest}}')
             echo "$REPO:$RELEASE-$name@$digest"
             variants=$(jq -c --arg n "$name" --arg d "$digest" '. + [{name: $n, digest: $d}]' <<< "$variants")

@@ -12,9 +12,11 @@ build provenance and an SPDX SBOM.
 | `<compiler>.c.qcow2` | one of clang 13/17/20/22 or gcc 15 | `nut-deps.c.qcow2` |
 
 Each manifest, `ghcr.io/<owner>/nut-ci-omnios:<release>-<compiler>`, holds
-the three layers of its chain plus each layer's package list
-(`*.pkgs.txt`, full IPS FMRIs) and file list (`*.files.txt`: sha256, mode,
-owner and path of every regular file). Its digest covers all of them.
+the three layers of its chain plus three lists per layer: packages
+(`*.pkgs.txt`, full IPS FMRIs), their licenses (`*.licenses.txt`, package
+name and license as OmniOS declares it) and files (`*.files.txt`: sha256,
+mode, owner and path of every regular file). Its digest covers all of
+them.
 Layers hold only their own clusters, zstd-compressed inside the qcow2, and
 name their backing file relatively, so QEMU boots the top file wherever
 the chain was pulled to. Boot a throwaway overlay of it, never the pulled
@@ -109,15 +111,27 @@ networkupstools takes the build over.
 The scripts and workflows in this repository are under the 0BSD license
 (LICENSE): use them for anything, no attribution needed.
 
-The images it builds are licensed differently. An image is an OmniOS
-system: illumos itself is mostly CDDL-1.0, and the packages on top
-keep their own licenses (GPL and LGPL for gcc, git and bash, Apache-2.0
-with the LLVM exception for clang, Apache-2.0 for OpenSSL, BSD-style for
-net-snmp, and so on). `pkg info --license <package>` inside an image shows
-each one. OmniOS publishes how every package is built
-([omnios-build](https://github.com/omniosorg/omnios-build),
-[omnios-extra](https://github.com/omniosorg/omnios-extra)), and each
-image's package list names the exact builds it contains.
+The images it builds have no license of their own. An image is a set of
+unmodified OmniOS packages, and each keeps the licenses it declares: CDDL
+for most of illumos, GPL and LGPL for gcc, binutils, git and bash, Apache
+for clang and OpenSSL, BSD and MIT for others, and the OpenSolaris Binary
+License (OSBL) for the few illumos components that only ever existed as
+binaries, such as `system/library` and some drivers. The image's
+`*.licenses.txt` lists them per package, the SBOM records them as each
+package's declared license (SPDX identifiers where OmniOS's name is
+unambiguous, `LicenseRef-OmniOS-<name>` otherwise), and
+`pkg info --license <package>` inside an image prints the text.
+
+### Source code
+
+The images change no package. The source of each one is what OmniOS built
+it from: the build recipes in
+[omnios-build](https://github.com/omniosorg/omnios-build) (the `omnios`
+publisher, at the `r151058` branch for r151058) and
+[omnios-extra](https://github.com/omniosorg/omnios-extra) (`extra.omnios`,
+one branch for all releases), and the upstream source archives those recipes fetch, which OmniOS mirrors
+at https://mirrors.omnios.org/. The FMRIs in an image's `*.pkgs.txt` name
+the exact package builds, so its sources can be found from them.
 
 The images don't include the tools that build them: QEMU (GPL-2.0),
 cloud-utils (GPL-3.0), ORAS (Apache-2.0) and the GitHub actions (MIT).

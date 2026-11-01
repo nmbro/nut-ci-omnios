@@ -1,7 +1,7 @@
 #!/bin/sh
 # Runs inside the OmniOS VM as root (layer.sh pipes it in):
 #   sh -s install <adduser:true|false> <FMRI>...
-#     install the pinned packages, write /var/tmp/layer/{pkgs,files}.txt
+#     install the pinned packages, write /var/tmp/layer/{pkgs,licenses,files}.txt
 #   sh -s seal
 #     make the disk ready to close as a layer: lists and package downloads
 #     gone, no package history, cloud-init reset, freed blocks TRIMmed
@@ -33,6 +33,8 @@ fi
 echo "vm-layer: install took $(( $(date +%s) - t0 )) s"
 
 pkg list -Hv | awk '{print $1}' | sort > "$out/pkgs.txt"
+# the license actions of every installed package: <package name> TAB <license>
+pkg contents -H -t license -o pkg.name,license | sort -u > "$out/licenses.txt"
 
 # cloud-init's default user (with our build key) is made per instance: each
 # clone gets its own, so none goes into the image

@@ -4,7 +4,7 @@
 #   base.c.qcow2          the official cloud image, checked against BASE_SHA256
 #   nut-deps.c.qcow2      DEPS_PKGS + the abuild user, on base
 #   <compiler>.c.qcow2    one per COMPILERS entry (or the ones named), on nut-deps
-# plus <layer>.pkgs.txt / <layer>.files.txt for each built layer.
+# plus <layer>.{pkgs,licenses,files}.txt for each built layer.
 # Needs qemu-system-x86_64 with KVM, qemu-img, cloud-localds, curl.
 set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)

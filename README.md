@@ -90,3 +90,21 @@ trust:
 While one person maintains this repository, the branch protection is that
 person's account. It matters once more people can push, for example if
 networkupstools takes the build over.
+
+## Licenses
+
+The scripts and workflows in this repository are under the 0BSD license
+(LICENSE): use them for anything, no attribution needed.
+
+That covers this repository only, not the images it builds. An image is an
+OmniOS system: illumos itself is mostly CDDL-1.0, and the packages on top
+keep their own licenses (GPL and LGPL for gcc, git and bash, Apache-2.0
+with the LLVM exception for clang, Apache-2.0 for OpenSSL, BSD-style for
+net-snmp, and so on). `pkg info --license <package>` inside an image shows
+each one. OmniOS publishes how every package is built
+([omnios-build](https://github.com/omniosorg/omnios-build),
+[omnios-extra](https://github.com/omniosorg/omnios-extra)), and each
+image's package list names the exact builds it contains.
+
+The tools that build the images are used, not shipped: QEMU (GPL-2.0),
+cloud-utils (GPL-3.0), ORAS (Apache-2.0) and the GitHub actions (MIT).
